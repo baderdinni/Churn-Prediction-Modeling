@@ -125,18 +125,18 @@ def generate_policy_history(base_policies, observation_date=datetime(2024, 1, 1)
                  - policy_date: Date of the policy month.
                  - policy_year: Policy year.
                  - policy_month_in_year: Month within the policy year.
-                 - product_type: Type of product (e.g., 'Annuity', 'Indexed Annuity').
+                 - product_type: Type of product.
                  - product_length: Length of the product in years.
-                 - line_of_business: Line of business (e.g., 'Retail', 'Reinsured').
+                 - line_of_business: Line of business.
                  - tax_status: Tax status of the policy.
                  - distributor_group: Distributor group.
-                 - account_value: Account value for the month.
-                 - account_value_category: Buckets of account value.
+                 - account_value: Account value at the end of the month.
+                 - account_value_category: Category of account value.
                  - attained_age: Age of the policyholder at the end of the month.
-                 - age_category: Buckets of attained age.
+                 - age_category: Category of attained age.
                  - crediting_rate: Crediting rate for the month.
                  - treasury_rate: Treasury rate for the month.
-                 - new_money_rate: Our own New money rate for the month.
+                 - new_money_rate: New money rate for the month.
                  - years_since_renewal: Years since the last renewal.
                  - in_first_renewal_year: Whether the policy is in the first renewal year.
 
@@ -385,4 +385,139 @@ def calculate_surrender_probability(row):
     age_cat = row['age_category']
     if row['years_since_renewal'] < 0:  # Before renewal
         if age_cat == '0-45':
-            log_odds += -4
+            log_odds += -4.01
+        elif age_cat == '45-55':
+            log_odds += -4.02
+        elif age_cat == '55-65':
+            log_odds += -4.03
+        elif age_cat == '65-70':
+            log_odds += -4.04
+        elif age_cat == '70-80':
+            log_odds += -4.05
+        else:  # 80+
+            log_odds += -4.06
+    else:  # After renewal (first or later)
+        if age_cat == '0-45':
+            log_odds += 0.1
+        elif age_cat == '45-55':
+            log_odds += 0.2
+        elif age_cat == '55-65':
+            log_odds += 0.3
+        elif age_cat == '65-70':
+            log_odds += 0.4
+        elif age_cat == '70-80':
+            log_odds += 0.5
+        else:  # 80+
+            log_odds += 0.3
+    
+    # Account value effects by renewal period
+    av_cat = row['account_value_category']
+    if row['years_since_renewal'] < 0:  # Before renewal
+        if av_cat == '0-25K':
+            log_odds += 1.6
+        elif av_cat == '25K-50K':
+            log_odds += 0.6
+        elif av_cat == '50K-100K':
+            log_odds += 0.2
+        elif av_cat == '200K-300K':
+            log_odds += -0.2
+        elif av_cat == '300K+':
+            log_odds += -0.6
+    else:  # After renewal (first or later)
+        if av_cat == '50K-100K':
+            log_odds += 0.6
+        elif av_cat == '100K-200K':
+            log_odds += 0.7
+        elif av_cat == '200K-300K':
+            log_odds += 0.8
+        elif av_cat == '300K+':
+            log_odds += 0.9
+    # Final simulation adjustment       
+    log_odds -= 0.4
+    # Convert log-odds to probability using logistic function
+    probability = expit(log_odds)
+    
+    return probability
+
+def generate_surrender_events(policy_history):
+    """
+    Generate surrender events based on the calculated surrender probabilities.
+
+    Parameters:
+    policy_history (pd.DataFrame): DataFrame containing the policy history.
+
+    Returns:
+    pd.DataFrame: A DataFrame with surrender events added.
+
+    Examples:
+    >>> policies = generate_policy_data(10)
+    >>> history = generate_policy_history(policies)
+    >>> history_with_surrender = generate_surrender_events(history)
+    >>> isinstance(history_with_surrender, pd.DataFrame)
+    True
+    >>> 'surrender' in history_with_surrender.columns
+    True
+    """
+    # Add surrender probability
+    policy_history['surrender_probability'] = policy_history.apply(calculate_surrender_probability, axis=1)
+    
+    # Add random number for comparison
+    policy_history['random_value'] = np.random.random(len(policy_history))
+    
+    # Determine surrender event (1 if random value < surrender probability)
+    policy_history['surrender'] = (policy_history['random_value'] < policy_history['surrender_probability']).astype(int)
+    
+    # Clean up temporary columns
+    policy_history = policy_history.drop(columns=['random_value'])
+    
+    # Identify first surrender for each policy
+    policy_history['first_surrender'] = policy_history.groupby('policy_id')['surrender'].cumsum()
+    policy_history['valid_record'] = (policy_history['first_surrender'] <= 1)
+    
+    # Filter out records after first surrender
+    final_history = policy_history[policy_history['valid_record']].copy()
+    final_history = final_history.drop(columns=['first_surrender', 'valid_record'])
+    
+    return final_history
+
+def generate_annuity_churn_dataset(num_policies=1000):
+    """
+    Generate a complete dataset of annuity policies with churn (surrender) events.
+
+    Parameters:
+    num_policies (int): Number of policies to generate.
+
+    Returns:
+    tuple: A tuple containing two DataFrames:
+           - final_dataset: The final dataset with surrender events.
+           - policy_history: The policy history before adding surrender events.
+
+    Examples:
+    >>> final_data, history = generate_annuity_churn_dataset(10)
+    >>> isinstance(final_data, pd.DataFrame) and isinstance(history, pd.DataFrame)
+    True
+    >>> len(final_data) <= len(history)
+    True
+    """
+    print("Generating base policy data...")
+    base_policies = generate_policy_data(num_policies)
+    
+    print("Generating policy history...")
+    policy_history = generate_policy_history(base_policies)
+    
+    print("Generating surrender events...")
+    final_dataset = generate_surrender_events(policy_history)
+    
+    print(f"Dataset generated with {len(final_dataset)} policy-month observations")
+    print(f"Total policies: {final_dataset['policy_id'].nunique()}")
+    print(f"Total surrenders: {final_dataset['surrender'].sum()}")
+    
+    return final_dataset, policy_history
+
+# Generate the dataset
+churn_data, policy_history = generate_annuity_churn_dataset(num_policies=9000)
+churn_data.groupby(['product_length','years_since_renewal','product_length']).surrender.agg(['mean','count','sum'])
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
