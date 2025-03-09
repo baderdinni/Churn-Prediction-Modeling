@@ -88,4 +88,4 @@ metrics_table = generate_metrics_table(test_data)
 print(metrics_table)
 
 # Feature importance
-from utils.feature_importance import extract_and_plot_feature_importance
+rf_feature_importance_df = extract_and_plot_feature_importance(rf_model, X_train.columns)
