@@ -4,7 +4,7 @@
 This project analyzes the churn behavior of annuity accumulation products, which are financial instruments that provide guaranteed returns for retirement savings. The analysis focuses on churn rates at different stages of the annuity maturity cycle, as illustrated in the provided image.
 
 ## Problem Statement
-- GAFG has a rich dataset of surrender/churn activity on annuity products, but predictions are being made using judgment-based approaches rather than data.
+- XYZ annuity has a rich dataset of surrender/churn activity on annuity products, but predictions are being made using judgment-based approaches rather than data.
 - Existing models rely on complex tables of churn rates that perform poorly across products and are difficult to maintain.
 - Several important factors were not included in the current model.
 - The data is a collection of multiple disparate datasets and business blocks, each with a different structure.
