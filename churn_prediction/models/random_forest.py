@@ -1,3 +1,4 @@
+"""Random forest model definition."""
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_validate, KFold
 

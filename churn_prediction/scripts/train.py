@@ -6,6 +6,7 @@ from utils.data_preprocessing import preprocess_data, split_data
 from utils.visualization import plot_cv_results, plot_loss_and_auc, plot_monthly_churn
 from torch.utils.data import DataLoader, TensorDataset
 import torch
+from utils.analysis import generate_metrics_table
 
 # Load data
 data = pd.read_csv('data/churn_data.csv')
@@ -80,3 +81,7 @@ monthly_data['nn_predicted_upper'] = monthly_data['nn_predicted_mean'] + 1.96 * 
 
 # Plot monthly churn
 plot_monthly_churn(monthly_data)
+
+# Back testing results
+metrics_table = generate_metrics_table(test_data)
+print(metrics_table)

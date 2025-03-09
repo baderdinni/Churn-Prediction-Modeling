@@ -3,6 +3,9 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 
 def preprocess_data(data):
+    """
+    Pre process training, test data for standardization, one hot encoding etc.
+    """
     data['policy_date'] = pd.to_datetime(data['policy_date'])
     data = data.sort_values(by='policy_date')
 
@@ -33,6 +36,9 @@ def preprocess_data(data):
     return X_train, X_test, y_train, y_test, label_encoders, scaler
 
 def split_data(X_train, y_train):
+    """
+    Train and val split data definition.
+    """
     X_train_split, X_val_split, y_train_split, y_val_split = train_test_split(
         X_train, y_train, test_size=0.2, random_state=42
     )
