@@ -6,7 +6,8 @@ from utils.data_preprocessing import preprocess_data, split_data
 from utils.visualization import plot_cv_results, plot_loss_and_auc, plot_monthly_churn
 from torch.utils.data import DataLoader, TensorDataset
 import torch
-from utils.analysis import generate_metrics_table
+from utils.backtesting_analysis import generate_metrics_table
+from utils.feature_importance import extract_and_plot_feature_importance
 
 # Load data
 data = pd.read_csv('data/churn_data.csv')
@@ -85,3 +86,6 @@ plot_monthly_churn(monthly_data)
 # Back testing results
 metrics_table = generate_metrics_table(test_data)
 print(metrics_table)
+
+# Feature importance
+from utils.feature_importance import extract_and_plot_feature_importance
