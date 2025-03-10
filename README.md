@@ -1,7 +1,7 @@
 # Annuity Accumulation Products & Churn Behavior Analysis
 
 ## Overview
-This project analyzes the churn behavior of annuity accumulation products, which are financial instruments that provide guaranteed returns for retirement savings. The analysis focuses on churn rates at different stages of the annuity maturity cycle, as illustrated in the provided image.
+This project analyzes the churn behavior of annuity accumulation products, which are financial instruments that provide guaranteed returns for retirement savings. The analysis focuses on churn rates at different stages of the annuity maturity cycle.
 
 ## Problem Statement
 - XYZ annuity has a rich dataset of surrender/churn activity on annuity products, but predictions are being made using judgment-based approaches rather than data.
