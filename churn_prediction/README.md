@@ -1,4 +1,4 @@
-Here’s a comprehensive `README.md` for your GitHub repository:
+Here’s a comprehensive `README.md`:
 
 ---
 
@@ -11,9 +11,6 @@ This repository contains code for predicting churn (surrender) for annuity produ
 2. [Repository Structure](#repository-structure)
 3. [Installation](#installation)
 4. [Usage](#usage)
-5. [Results](#results)
-6. [Contributing](#contributing)
-7. [License](#license)
 
 ---
 
@@ -43,7 +40,9 @@ churn-prediction/
 │   └── feed_forward_nn.py    # Feed-Forward Neural Network model class
 ├── utils/                    # Utility functions
 │   ├── __init__.py
-│   ├── data_preprocessing.py # Functions for data preprocessing
+│   ├── backtesting_analysis.py # Functions for backtesting the model results
+│   └── data_preprocessing.py # Functions for data preprocessing
+│   └── feature_importance.py # Functions for feature importance from the model
 │   └── visualization.py      # Functions for plotting results
 ├── scripts/                  # Main script to run the project
 │   └── train.py              # Script to train and evaluate models
